@@ -1,7 +1,7 @@
 {
-  "name": "preact-compat",
+  "name": "mkb-preact-compat",
   "amdName": "preactCompat",
-  "version": "3.16.0",
+  "version": "1.0.1",
   "description": "A React compatibility layer for Preact",
   "main": "dist/preact-compat.js",
   "minified:main": "dist/preact-compat.min.js",
