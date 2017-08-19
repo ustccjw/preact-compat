@@ -24,7 +24,7 @@ const AUTOBIND_BLACKLIST = {
 };
 
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vert|word|writing|x)[A-Z]/;
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
 
 
 const BYPASS_HOOK = {};
@@ -359,17 +359,28 @@ function applyEventNormalization({ nodeName, attributes }) {
 }
 
 
-function applyClassName({ attributes }) {
-	if (!attributes) return;
-	let cl = attributes.className || attributes.class;
-	if (cl) attributes.className = cl;
+function applyClassName(vnode) {
+	let a = vnode.attributes || (vnode.attributes = {});
+	classNameDescriptor.enumerable = 'className' in a;
+	if (a.className) a.class = a.className;
+	Object.defineProperty(a, 'className', classNameDescriptor);
 }
 
 
+let classNameDescriptor = {
+	configurable: true,
+	get() { return this.class; },
+	set(v) { this.class = v; }
+};
+
 function extend(base, props) {
-	for (let key in props) {
-		if (props.hasOwnProperty(key)) {
-			base[key] = props[key];
+	for (let i=1, obj; i<arguments.length; i++) {
+		if ((obj = arguments[i])) {
+			for (let key in obj) {
+				if (obj.hasOwnProperty(key)) {
+					base[key] = obj[key];
+				}
+			}
 		}
 	}
 	return base;
@@ -580,8 +591,6 @@ PureComponent.prototype.shouldComponentUpdate = function(props, state) {
 	return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
 };
 
-
-
 export {
 	version,
 	DOM,
@@ -597,7 +606,10 @@ export {
 	unmountComponentAtNode,
 	Component,
 	PureComponent,
-	renderSubtreeIntoContainer as unstable_renderSubtreeIntoContainer
+	renderSubtreeIntoContainer as unstable_renderSubtreeIntoContainer,
+	// this is a really old hidden react api, but something out there uses it
+	// https://twitter.com/Joseph_Wynn/status/888046593286574085
+	extend as __spread
 };
 
 export default {
@@ -615,5 +627,6 @@ export default {
 	unmountComponentAtNode,
 	Component,
 	PureComponent,
-	unstable_renderSubtreeIntoContainer: renderSubtreeIntoContainer
+	unstable_renderSubtreeIntoContainer: renderSubtreeIntoContainer,
+	__spread: extend
 };
